@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Square Math Game - Home</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: sans-serif;
+      background: #1c0033;
+      color: white;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .floating-char {
+      position: absolute;
+      bottom: 0;
+      font-size: 1.8em;
+      font-weight: bold;
+      color: white;
+      opacity: 0.8;
+      animation: floatUp 8s linear forwards;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.9;
+      }
+      100% {
+        transform: translateY(-100vh) scale(1.5);
+        opacity: 0;
+      }
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      padding: 2em;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 0.5em;
+    }
+
+    p {
+      font-size: 1.2em;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 1.2em;
+      border: none;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 1em;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    canvas {
+      margin-top: 20px;
+      border: 4px solid white;
+      border-radius: 10px;
+      background: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Welcome to the Square Math Game</h1>
+    <p>Click below or scan the QR code to start playing!</p>
+    <button onclick="location.href='game.html?start=true'">▶ Start Game</button>
+    <canvas id="qrcode"></canvas>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+  <script>
+    // Floating characters
+    const chars = ['+', '-', '×', '÷', '=', '≠', '%', '^', '∑', '√', 'π', '∞'];
+    function createFloatingChar() {
+      const char = document.createElement("div");
+      char.classList.add("floating-char");
+
+      const isNumber = Math.random() < 0.5;
+      const value = isNumber
+        ? Math.floor(Math.random() * 100)
+        : chars[Math.floor(Math.random() * chars.length)];
+
+      char.innerText = value;
+      char.style.left = `${Math.random() * 100}%`;
+      char.style.fontSize = `${Math.random() * 20 + 20}px`;
+
+      document.body.appendChild(char);
+      setTimeout(() => char.remove(), 8000);
+    }
+
+    setInterval(createFloatingChar, 300);
+
+    // Generate QR code
+    const qr = new QRious({
+      element: document.getElementById('qrcode'),
+      size: 200,
+      value: 'https://vijayadurga176.github.io/Game/game.html?start=true'
+    });
+  </script>
+</body>
+</html>

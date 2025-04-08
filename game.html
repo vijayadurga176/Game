@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Square Math Game</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background-color: #2c003e; /* Dark purple */
+      font-family: sans-serif;
+      color: white;
+    }
+
+    h1 {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    #container {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 2em;
+    }
+
+    input[type="number"] {
+      padding: 10px;
+      font-size: 1.1em;
+      margin: 10px;
+      width: 200px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 1.1em;
+      border: none;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #restartBtn {
+      background-color: #007BFF;
+      display: none;
+    }
+
+    #restartBtn:hover {
+      background-color: #0056b3;
+    }
+
+    #result, #score, #wrongCount, #chancesLeft, #timer {
+      font-weight: bold;
+    }
+
+    #gameArea {
+      display: none;
+    }
+
+    #timer {
+      font-size: 1.5em;
+      color: #ff9999;
+    }
+
+    .floating-char {
+      position: absolute;
+      bottom: 0;
+      font-size: 1.8em;
+      font-weight: bold;
+      color: white;
+      opacity: 0.8;
+      animation: floatUp 8s linear forwards;
+      z-index: 1;
+      pointer-events: none;
+      text-shadow: 0 0 5px white, 0 0 10px white;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0) scale(1) rotate(0deg);
+        opacity: 0.9;
+      }
+      100% {
+        transform: translateY(-100vh) scale(1.5) rotate(360deg);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h1>Square Math Game</h1>
+    <div id="startPrompt">
+      <p>Click the button below or scan the QR code to start the game.</p>
+      <button onclick="startGame()">Start Game</button>
+    </div>
+
+    <div id="gameArea">
+      <div id="question">Loading...</div>
+      <input type="number" id="answer" placeholder="Your Answer" />
+      <br>
+      <button onclick="submitAnswer()">Submit</button>
+      <p id="result"></p>
+      <p>⏱ Time Left: <span id="timer">2:00</span></p>
+      <p>✅ Correct Answers: <span id="score">0</span></p>
+      <p>❌ Wrong Answers: <span id="wrongCount">0</span></p>
+      <p>🔁 Chances left: <span id="chancesLeft">4</span></p>
+      <br>
+      <button id="restartBtn" onclick="restartGame()">🔄 Restart Game</button>
+    </div>
+  </div>
+
+  <script>
+    const chars = ['+', '-', '×', '÷', '=', '≠', '%', '^', '∑', '√', 'π', '∞'];
+
+    function createFloatingChar() {
+      const char = document.createElement("div");
+      char.classList.add("floating-char");
+      const isNumber = Math.random() < 0.5;
+      const value = isNumber
+        ? Math.floor(Math.random() * 100)
+        : chars[Math.floor(Math.random() * chars.length)];
+
+      char.innerText = value;
+      char.style.left = `${Math.random() * 100}%`;
+      char.style.fontSize = `${Math.random() * 20 + 20}px`;
+      document.body.appendChild(char);
+      setTimeout(() => char.remove(), 8000);
+    }
+
+    setInterval(createFloatingChar, 300);
+
+    let num1, num2, correctAnswer;
+    let score = 0;
+    let wrong = 0;
+    let chances = 4;
+    let timerInterval;
+    let timeLeft = 120;
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    function generateQuestion() {
+      clearInterval(timerInterval);
+      document.getElementById('restartBtn').style.display = 'none';
+      num1 = Math.floor(Math.random() * 20 + 1);
+      num2 = Math.floor(Math.random() * 20 + 1);
+      correctAnswer = num1 * num1 - num2 * num2;
+      document.getElementById('question').innerText = `What is ${num1}² - ${num2}²?`;
+      document.getElementById('answer').value = '';
+      document.getElementById('result').innerText = '';
+      chances = 4;
+      document.getElementById('chancesLeft').innerText = chances;
+      timeLeft = 120;
+      document.getElementById('timer').innerText = formatTime(timeLeft);
+      startTimer();
+    }
+
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timer').innerText = formatTime(timeLeft);
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          handleTimeout();
+        }
+      }, 1000);
+    }
+
+    function handleTimeout() {
+      wrong++;
+      document.getElementById('wrongCount').innerText = wrong;
+      document.getElementById('result').innerText = `⏰ Time's up! The correct answer was ${correctAnswer}`;
+      document.getElementById('restartBtn').style.display = 'inline-block';
+    }
+
+    function submitAnswer() {
+      const userAnswer = parseInt(document.getElementById('answer').value);
+      if (isNaN(userAnswer)) {
+        document.getElementById('result').innerText = "⚠️ Please enter a valid number.";
+        return;
+      }
+
+      if (userAnswer === correctAnswer) {
+        clearInterval(timerInterval);
+        score++;
+        document.getElementById('score').innerText = score;
+        document.getElementById('result').innerText = "✅ Correct!";
+        setTimeout(generateQuestion, 1500);
+      } else {
+        chances--;
+        document.getElementById('chancesLeft').innerText = chances;
+        if (chances > 0) {
+          document.getElementById('result').innerText = `❌ Wrong! Try again.`;
+        } else {
+          clearInterval(timerInterval);
+          wrong++;
+          document.getElementById('wrongCount').innerText = wrong;
+          document.getElementById('result').innerText = `❌ Wrong! The correct answer was ${correctAnswer}`;
+          document.getElementById('restartBtn').style.display = 'inline-block';
+        }
+      }
+    }
+
+    function startGame() {
+      document.getElementById('startPrompt').style.display = 'none';
+      document.getElementById('gameArea').style.display = 'block';
+      score = 0;
+      wrong = 0;
+      document.getElementById('score').innerText = score;
+      document.getElementById('wrongCount').innerText = wrong;
+      generateQuestion();
+    }
+
+    function restartGame() {
+      score = 0;
+      wrong = 0;
+      document.getElementById('score').innerText = score;
+      document.getElementById('wrongCount').innerText = wrong;
+      document.getElementById('restartBtn').style.display = 'none';
+      generateQuestion();
+    }
+
+    window.onload = function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('start') === 'true') {
+        startGame();
+      }
+    };
+  </script>
+</body>
+</html>
