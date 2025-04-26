@@ -90,7 +90,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <script>
-    // Floating characters
     const chars = ['+', '-', '×', '÷', '=', '≠', '%', '^', '∑', '√', 'π', '∞'];
     function createFloatingChar() {
       const char = document.createElement("div");
@@ -110,8 +109,7 @@
     }
 
     setInterval(createFloatingChar, 300);
-
-    // Generate QR code
+   
     const qr = new QRious({
       element: document.getElementById('qrcode'),
       size: 200,
